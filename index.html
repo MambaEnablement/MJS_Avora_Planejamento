@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MJS Avora | Operação Scale 100K - 14 Fases</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mamba: {
+                            bg: '#050505',
+                            purple: '#7c3aed',
+                            'purple-light': '#a855f7',
+                            'purple-dark': '#581c87',
+                            highlight: '#FECE15',
+                            success: '#22c55e',
+                            shopee: '#f97316',
+                            glass: 'rgba(17, 17, 17, 0.78)',
+                            border: 'rgba(124, 58, 237, 0.15)'
+                        }
+                    },
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            background-image: 
+                linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            scroll-behavior: smooth;
+        }
+
+        .glass-panel {
+            background: rgba(17, 17, 17, 0.78);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(124, 58, 237, 0.15);
+        }
+
+        .text-gradient-purple {
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hover-neon-purple:hover {
+            box-shadow: 0 0 25px rgba(124, 58, 237, 0.25);
+            border-color: rgba(124, 58, 237, 0.5);
+        }
+
+        .nav-btn { transition: all 0.3s ease; cursor: pointer; }
+        .nav-btn:hover {
+            background: rgba(124, 58, 237, 0.15);
+            border-color: #a855f7;
+            color: #ffffff;
+        }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
+        
+        /* Interatividade Hover Goals */
+        .interactive-card { overflow: hidden; position: relative; transition: all 0.4s ease; min-height: 280px; }
+        .interactive-card .card-content { transition: transform 0.5s ease; }
+        .interactive-card:hover .card-content { transform: translateY(-16px); }
+        .interactive-card .card-goal {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            transform: translateY(100%); opacity: 0;
+            transition: all 0.5s ease;
+            background: linear-gradient(to top, rgba(88, 28, 135, 0.95), rgba(88, 28, 135, 0.8), rgba(0,0,0,0.9));
+            padding: 24px 24px 16px 24px;
+        }
+        .interactive-card:hover .card-goal { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <div class="sticky top-4 z-50 w-full max-w-5xl flex flex-wrap justify-center items-center gap-2 mb-8 glass-panel py-3 px-4 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-[100]">
+        <button onclick="scrollToSection('hero')" class="nav-btn px-4 py-2 rounded-full text-xs md:text-sm font-semibold text-gray-300 border border-transparent">Início</button>
+        <button onclick="scrollToSection('diagnostico')" class="nav-btn px-4 py-2 rounded-full text-xs md:text-sm font-semibold text-gray-300 border border-transparent">Diagnóstico</button>
+        <button onclick="scrollToSection('ml')" class="nav-btn px-4 py-2 rounded-full text-xs md:text-sm font-semibold text-gray-300 border border-transparent">ML (7 Fases)</button>
+        <button onclick="scrollToSection('shopee')" class="nav-btn px-4 py-2 rounded-full text-xs md:text-sm font-semibold text-gray-300 border border-transparent">Shopee (7 Fases)</button>
+        <button onclick="scrollToSection('projecao')" class="nav-btn px-4 py-2 rounded-full text-xs md:text-sm font-semibold text-gray-300 border border-transparent">Gráfico de Escala</button>
+        <button onclick="scrollToSection('futuro')" class="nav-btn px-4 py-2 rounded-full text-xs md:text-sm font-bold text-mamba-purple-light border border-transparent bg-mamba-purple/10">Pós-Scale</button>
+    </div>
+
+    <main class="w-full max-w-7xl">
+        
+        <header id="hero" class="mb-20 text-center mt-6">
+            <h3 class="text-mamba-purple-light font-montserrat font-bold tracking-widest uppercase text-sm mb-2">Plano de Implementação Estratégica</h3>
+            <h1 class="font-montserrat font-black text-5xl md:text-7xl text-mamba-purple tracking-tight mb-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.3)]">MJS Avora</h1>
+            <p class="text-[#9ca3af] font-inter font-light text-lg max-w-3xl mx-auto mb-10">
+                Operação Scale 100K. Um roteiro de execução técnico para unificar a estratégia de canais, transformando o Mercado Livre no pilar de valor da marca e a Shopee numa máquina de tração de volume.
+            </p>
+            
+            <div class="glass-panel px-10 py-8 rounded-2xl border-mamba-purple-light/40 shadow-[0_0_40px_rgba(124,58,237,0.2)] inline-block relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-mamba-purple/5 via-mamba-purple/10 to-mamba-purple/5 animate-pulse"></div>
+                <div class="text-xs text-mamba-purple-light font-bold uppercase tracking-widest mb-2 relative z-10">Meta de Faturamento Consolidado</div>
+                <div class="font-montserrat font-black text-4xl md:text-6xl text-mamba-highlight relative z-10 drop-shadow-[0_0_15px_rgba(254,206,21,0.3)]">
+                    R$100.000 / mês
+                </div>
+            </div>
+        </header>
+
+        <div class="border-t border-mamba-purple/20 w-1/2 mx-auto my-16"></div>
+
+        <section id="diagnostico" class="mb-20 pt-4">
+            <h2 class="font-montserrat font-bold text-3xl mb-8 border-b border-mamba-purple/20 pb-4 text-white">1. Diagnóstico de Eficiência</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-panel p-8 rounded-xl bg-mamba-purple/5 border border-mamba-purple/30 shadow-[0_0_30px_rgba(124,58,237,0.1)]">
+                    <h4 class="text-mamba-purple-light font-bold mb-4 uppercase text-sm tracking-wider flex items-center gap-2">
+                        Oportunidade Reprimida (ML)
+                    </h4>
+                    <p class="text-base text-gray-300 font-inter leading-relaxed mb-4">
+                        Detetámos <strong>34 carrinhos abandonados</strong> no Mercado Livre, totalizando <strong>R$7.309,00</strong> em faturamento parado. A "Prioridade Zero" é a conversão imediata destas leads via cupões dinâmicos.
+                    </p>
+                    <p class="text-sm text-mamba-highlight font-bold">🎯 Objetivo: Injeção de tesouraria imediata para financiar a expansão.</p>
+                </div>
+                <div class="glass-panel p-8 rounded-xl bg-black/40 border border-white/10">
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">KPIs Atuais (Base 30 Dias)</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-gray-400">Vendas Brutas (ML):</span> <span class="font-bold text-white">R$1.139,00</span></div>
+                        <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-gray-400">Vendas Brutas (Shopee):</span> <span class="font-bold text-white">R$3.249,75</span></div>
+                        <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-gray-400">Ticket Médio (Premium ML):</span> <span class="font-bold text-mamba-highlight">R$75,93</span></div>
+                        <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-gray-400">Conversão Shopee:</span> <span class="font-bold text-mamba-success">5,18%</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="border-t border-mamba-purple/20 w-1/2 mx-auto my-16"></div>
+
+        <section id="ml" class="mb-20 pt-4">
+            <div class="flex items-center gap-4 mb-8 border-b border-mamba-purple/20 pb-4">
+                <img src="https://logodownload.org/wp-content/uploads/2016/08/mercado-livre-logo-0.png" alt="Mercado Livre" class="h-10 brightness-0 invert opacity-80">
+                <h2 class="font-montserrat font-bold text-3xl text-white">Mercado Livre: Roadmap 7 Fases</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-purple-light hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-purple-light font-bold text-2xl mb-2">01</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">SEO Semântico</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Auditoria de palavras-chave da concorrência direta.</li>
+                            <li>Reformulação de títulos: "Marca + Produto + Ativo + Dor" (ex: 9 Tons Vivance/Splendore).</li>
+                            <li>Inserção de EANs válidos e preenchimento de 100% da Ficha Técnica.</li>
+                            <li>Mapeamento de palavras negativas para Ads.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Indexação orgânica de alta intenção em 100% do catálogo e aumento do Quality Score dos anúncios.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-purple-light hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-purple-light font-bold text-2xl mb-2">02</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Recovery (Carrinhos)</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Ativação de cupões dinâmicos (3 a 14 dias) para as 34 leads paradas.</li>
+                            <li>Campanhas de remarketing interno via Ads.</li>
+                            <li>Ajuste de precificação psicológica nos itens de entrada.</li>
+                            <li>Envio de descontos cross-sell para compradores recentes.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Resgate de R$7.309,00 parados, convertendo leads mornos em fluxo de caixa imediato.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-purple-light hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-purple-light font-bold text-2xl mb-2">03</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Branding & Página</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Ativação de "Minha Página" com Banner Hero (1920x300).</li>
+                            <li>Categorização visual por "Dor/Tratamento" (ex: Reconstrução).</li>
+                            <li>Criação de guias de uso/tabelas nas imagens secundárias.</li>
+                            <li>Harmonização da paleta visual da vitrine.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Autoridade de marca estabelecida, justificando o ticket médio premium para os consumidores mais exigentes.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-purple-light hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-purple-light font-bold text-2xl mb-2">04</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Redutor de CAC (Clips)</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Produção de conteúdos ASMR e tutoriais de uso capilar.</li>
+                            <li>Tagging de produtos diretos nos vídeos (ML Clips).</li>
+                            <li>Parcerias para envio de UGC (Conteúdo Gerado por Utilizador).</li>
+                            <li>Programação de publicações com foco em visualização nativa.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Custo de Aquisição (CAC) diluído pela viralização orgânica nativa da própria plataforma.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-purple-light hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-purple-light font-bold text-2xl mb-2">05</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Performance Ads</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Lançamento de Product Ads com Target TACOS (10% a 12%).</li>
+                            <li>Teste A/B de lances focados na Curva A de faturamento.</li>
+                            <li>Campanhas de Brand Protection (Defesa da marca).</li>
+                            <li>Impulsionamento agressivo de "Kits Profissionais" (ex: Kit Phytonutry).</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Faturamento impulsionado exponencialmente, operando dentro de uma margem segura e previsível.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-purple-light hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-purple-light font-bold text-2xl mb-2">06</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Blindagem Logística</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Implementação de lacres térmicos e válvulas reforçadas.</li>
+                            <li>Treinamento da equipa de expedição para embalagem anti-vazamento.</li>
+                            <li>Implementação de checklist de dupla conferência.</li>
+                            <li>Garantir stock de segurança (45 dias) na curva A.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Índice de reclamações (NFR) zerado. Reputação verde-escura blindada contra infrações algorítmicas.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-highlight hover-neon-purple transition-all bg-mamba-highlight/5 interactive-card relative md:col-span-2 lg:col-span-2">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-highlight font-bold text-2xl mb-2">07</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">SLA Militar & Fidelização</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Atendimento técnico especializado com SLA < 10 minutos comerciais.</li>
+                            <li>Automação de respostas rápidas (Chatbots híbridos).</li>
+                            <li>Régua de relacionamento e resolução proativa de problemas.</li>
+                            <li>Pesquisa de satisfação (NPS) interna pós-entrega.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-black text-sm mb-1">🎯 Resultado Consolidado:</p>
+                        <p class="text-[11px] text-white font-bold">MJS Avora atinge o estatuto de Liderança, com a marca a operar como referência absoluta em atendimento e recompra no Mercado Livre.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="border-t border-mamba-purple/20 w-1/2 mx-auto my-16"></div>
+
+        <section id="shopee" class="mb-20 pt-4">
+            <div class="flex items-center gap-4 mb-8 border-b border-mamba-purple/20 pb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 text-white" viewBox="0 0 448 512" fill="currentColor"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
+                <h2 class="font-montserrat font-bold text-3xl text-white">Shopee: Roadmap 7 Fases</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-shopee hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-shopee font-bold text-2xl mb-2">01</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Mamba Nexus</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Auditoria via API para cálculo automático de margem líquida.</li>
+                            <li>Mapeamento de Ebitda e Curva ABC de rentabilidade.</li>
+                            <li>Ajuste de preços base focado em futuras campanhas (Spike Days).</li>
+                            <li>Configuração do Break-even ROAS limite.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Visão financeira em tempo real. Cada real investido na Shopee será calculado para gerar lucro comprovado.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-shopee hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-shopee font-bold text-2xl mb-2">02</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Engenharia de Kits</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Criação de soluções de dor (ex: Kit Alisamento + Pós-Química) para diluição de frete.</li>
+                            <li>Aplicação de "Compre e Ganhe" com brindes (Curva C).</li>
+                            <li>Teste de elásticos de preço (Ancoragem psicológica).</li>
+                            <li>Otimização de peso/cubagem para redução de frete.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Ticket médio elevado de R$89,32 para acima de R$130,00.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-shopee hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-shopee font-bold text-2xl mb-2">03</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">SEO & Indexação</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Preenchimento de 100% dos atributos técnicos obrigatórios.</li>
+                            <li>Utilização máxima das tags de categoria.</li>
+                            <li>Títulos com gatilhos de sazonalidade e busca orgânica.</li>
+                            <li>Descrições longas estruturadas com bullet points.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Alcance orgânico massivo nos filtros laterais da Shopee.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-shopee hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-shopee font-bold text-2xl mb-2">04</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Decoração Premium</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Shop Decoration Mobile (720x160) ativada e atrativa.</li>
+                            <li>Banners carrossel focados nas mega campanhas (ex: 6.6).</li>
+                            <li>Módulos de categorias por "Tipo de Tratamento".</li>
+                            <li>Cupões ocultos e dinâmicos gerados para Seguidores.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Aumento drástico no CTR e tempo de permanência na vitrine.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-shopee hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-shopee font-bold text-2xl mb-2">05</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Vídeos & Lives</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Vídeos curtos nas capas de todos os itens da Curva A.</li>
+                            <li>Roteiro semanal de Shopee Lives com interação direta.</li>
+                            <li>Distribuição de Shopee Moedas como gamificação de retenção.</li>
+                            <li>Liberação de cupões relâmpago apenas durante as Lives.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Pico de engagement social. A demonstração de textura e uso eleva a conversão em mais de 25%.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-shopee hover-neon-purple transition-all bg-black/40 interactive-card relative">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-shopee font-bold text-2xl mb-2">06</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">Shopee Ads Agressivo</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Ads de Busca com segmentação de palavra-chave exata.</li>
+                            <li>Discovery Ads configurado para roubo de tráfego a concorrentes.</li>
+                            <li>Lances massivos automatizados para dias de pagamento (5 e 20).</li>
+                            <li>Otimização semanal eliminando cliques vazios.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal">
+                        <p class="text-mamba-highlight font-bold text-xs mb-1">🎯 Meta Alcançada:</p>
+                        <p class="text-[11px] text-white">Domínio das primeiras posições patrocinadas e crescimento acelerado de impressões na loja.</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl border-t-4 border-mamba-highlight hover-neon-purple transition-all bg-mamba-highlight/5 interactive-card relative md:col-span-2 lg:col-span-2">
+                    <div class="card-content p-6 h-full">
+                        <div class="text-mamba-highlight font-bold text-2xl mb-2">07</div>
+                        <h3 class="font-montserrat font-bold text-base text-white mb-2">CRM & Afiliados</h3>
+                        <ul class="text-[11px] text-[#9ca3af] list-disc list-inside space-y-1">
+                            <li>Disparo massivo de Chat Broadcast nos grandes "Spike Days" (ex: 6.6, 8.8).</li>
+                            <li>Comissionamento agressivo (15%) para a rede de Afiliados girar itens foco.</li>
+                            <li>Régua de CRM programada para oferecer desconto na recompra após 45 dias.</li>
+                            <li>Implantação de um mini-programa de fidelidade na Shopee.</li>
+                        </ul>
+                    </div>
+                    <div class="card-goal !bg-orange-700/90">
+                        <p class="text-black font-black text-sm mb-1">🎯 Resultado Final Shopee:</p>
+                        <p class="text-[11px] text-black font-bold">Shopee transformada numa máquina de tração. Estatuto de "Vendedor Indicado" blindado, com tráfego externo gerado via parceiros e retenção máxima.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="border-t border-mamba-purple/20 w-1/2 mx-auto my-16"></div>
+
+        <section id="projecao" class="mb-20 pt-4">
+            <h2 class="font-montserrat font-bold text-3xl mb-8 border-b border-mamba-purple/20 pb-4 text-white">Gráfico de Escala Financeira (0-120 Dias)</h2>
+            <p class="text-[#9ca3af] text-sm mb-6">A consistência nas 14 fases gera a previsibilidade necessária. O gráfico demonstra a curva da <strong>Operação Scale 100K</strong>, isolando a contribuição de cada canal rumo ao objetivo.</p>
+            
+            <div class="glass-panel p-6 rounded-xl hover-neon-purple flex flex-col w-full h-[450px]">
+                <h3 class="font-montserrat font-bold text-lg mb-4 text-white">Trajetória de Faturamento Projetado (Por Canal e Consolidado)</h3>
+                <div class="w-full h-full flex-grow relative">
+                    <canvas id="projectionChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <div class="border-t border-mamba-purple/20 w-1/2 mx-auto my-16"></div>
+
+        <section id="futuro" class="mb-24 pt-4">
+            <div class="glass-panel p-10 md:p-14 rounded-2xl bg-mamba-purple/10 border border-mamba-purple/30 text-center relative overflow-hidden shadow-[0_0_50px_rgba(124,58,237,0.15)]">
+                <div class="absolute inset-0 bg-gradient-to-t from-mamba-purple-dark/40 to-transparent"></div>
+                <h2 class="font-montserrat font-black text-2xl md:text-4xl text-white mb-6 relative z-10 tracking-tight">Além dos 100K: O Que Acontece Após Bater a Meta?</h2>
+                <p class="text-gray-300 font-inter text-base md:text-lg leading-relaxed max-w-4xl mx-auto relative z-10 mb-8">
+                    Atingir R$100.000 mensais não é a linha de chegada, é o novo <strong>piso operacional</strong> da marca. A consolidação deste Masterplan cria as fundações estruturais para o domínio irreversível da MJS Avora no comércio digital.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 text-left">
+                    <div class="glass-panel p-6 rounded-xl bg-black/40 border border-mamba-purple/20 hover-neon-purple transition-all">
+                        <div class="w-8 h-8 rounded-full bg-mamba-purple flex items-center justify-center mb-3 text-white font-bold">1</div>
+                        <h5 class="text-white font-bold mb-2 text-sm">Lucratividade em Piloto Automático</h5>
+                        <p class="text-xs text-gray-400">Com o catálogo 100% otimizado via SEO e a curva de aprendizagem do algoritmo já superada, o Custo de Aquisição (CAC) cai drasticamente. O volume de tráfego orgânico nativo e a forte recompra sustentam e protegem a margem de lucro (Ebitda).</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl bg-black/40 border border-mamba-purple/20 hover-neon-purple transition-all">
+                        <div class="w-8 h-8 rounded-full bg-mamba-purple flex items-center justify-center mb-3 text-white font-bold">2</div>
+                        <h5 class="text-white font-bold mb-2 text-sm">Máquina de Lançamentos a Custo Zero</h5>
+                        <p class="text-xs text-gray-400">Ao estabelecer uma base massiva de clientes e milhares de seguidores ativos nas lojas, qualquer novo produto lançado pela MJS Avora ganha força e avaliações imediatas, capturando as primeiras posições das buscas sem a necessidade de queimar tesouraria em marketing inicial.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl bg-black/40 border border-mamba-highlight/30 hover-neon-purple transition-all">
+                        <div class="w-8 h-8 rounded-full bg-mamba-highlight flex items-center justify-center mb-3 text-black font-bold">3</div>
+                        <h5 class="text-white font-bold mb-2 text-sm">Expansão de Ecossistema</h5>
+                        <p class="text-[#FECE15] font-bold text-xs">Com a logística dominada (Full), taxas de falhas anuladas e fluxo de caixa contínuo, a marca conquista o fôlego financeiro e estrutural para expandir a operação em Marketplaces premium (como Amazon), copiando e colando um modelo validado e escalável.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-4 text-center text-[#9ca3af] text-xs font-inter py-6 border-t border-white/10 w-full">
+        <p>&copy; 2026 Arquitetura de Conversão | Masterplan MJS Avora Scale 100K.</p>
+    </footer>
+
+    <script>
+        function scrollToSection(id) {
+            const section = document.getElementById(id);
+            if(section) {
+                const yOffset = -90; 
+                const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({top: y, behavior: 'smooth'});
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('section, header');
+            const navButtons = document.querySelectorAll('.nav-btn');
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (scrollY >= sectionTop - 150) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navButtons.forEach(btn => {
+                    btn.classList.remove('text-white', 'text-mamba-purple-light', 'bg-mamba-purple/10');
+                    if (btn.getAttribute('onclick').includes('futuro')) {
+                        // mantém original
+                    } else {
+                        btn.classList.add('text-gray-300');
+                    }
+                    
+                    if (btn.getAttribute('onclick').includes(current)) {
+                        if (!btn.getAttribute('onclick').includes('futuro')) {
+                            btn.classList.remove('text-gray-300');
+                            btn.classList.add('text-mamba-purple-light', 'bg-mamba-purple/10');
+                        }
+                    }
+                });
+            });
+
+            Chart.defaults.color = '#9ca3af';
+            Chart.defaults.font.family = 'Inter';
+
+            const ctxProj = document.getElementById('projectionChart').getContext('2d');
+            
+            new Chart(ctxProj, {
+                type: 'line',
+                data: {
+                    labels: ['Fundação (0-30 Dias)', 'Tração (30-60 Dias)', 'Explosão (60-100 Dias)', 'Consolidação (100-120 Dias)'],
+                    datasets: [
+                        {
+                            label: 'Mercado Livre',
+                            data: [10000, 20000, 45000, 60000],
+                            borderColor: '#a855f7',
+                            backgroundColor: 'transparent',
+                            borderWidth: 4,
+                            tension: 0.3,
+                            pointBackgroundColor: '#050505',
+                            pointBorderColor: '#a855f7',
+                            pointBorderWidth: 3,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Shopee',
+                            data: [5000, 15000, 30000, 40000],
+                            borderColor: '#f97316', 
+                            backgroundColor: 'transparent',
+                            borderWidth: 4,
+                            tension: 0.3,
+                            pointBackgroundColor: '#050505',
+                            pointBorderColor: '#f97316',
+                            pointBorderWidth: 3,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Faturamento Total Consolidado',
+                            data: [15000, 35000, 75000, 100000],
+                            borderColor: '#FECE15',
+                            backgroundColor: 'rgba(254, 206, 21, 0.05)',
+                            borderWidth: 4,
+                            borderDash: [5, 5],
+                            fill: true,
+                            tension: 0.3,
+                            pointBackgroundColor: '#050505',
+                            pointBorderColor: '#FECE15',
+                            pointBorderWidth: 3,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#9ca3af', font: { family: 'Inter', size: 13, weight: 'bold' }, padding: 20 }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17,17,17,0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#FECE15',
+                            borderColor: 'rgba(124, 58, 237, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': R$' + context.raw.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(124, 58, 237, 0.1)', drawBorder: false },
+                            ticks: {
+                                padding: 10,
+                                callback: function(value) { return 'R$' + (value / 1000) + 'k'; }
+                            }
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: { padding: 10, font: { weight: 'bold', size: 12 } }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
